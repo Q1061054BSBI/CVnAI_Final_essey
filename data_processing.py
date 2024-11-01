@@ -163,7 +163,7 @@ def count_poses(annotations_dir, image_files):
         for obj in root.findall('object'):
             if obj.find('name').text == "person":
                 label = get_person_label(obj)
-            pose_counts[label] += 1
+                pose_counts[label] += 1
 
     return pose_counts
 

@@ -80,7 +80,7 @@ plot_class_distribution(train_class_counts, title="Class Distribution in Trainin
 # plot_class_distribution(validation_class_counts, title="Class Distribution in Validation Set")
 
 #detecting classed from train dataset wich need to be augmented
-minor_classes = identify_minor_classes(train_class_counts, threshold=500)
+minor_classes = identify_minor_classes(train_class_counts, threshold=600)
 domenant_classes = identify_domenant_classes(train_class_counts, threshold=1500)
 augment_voc_classes(classes=minor_classes, image_names=train_images, images_dir=data_dir,  annotations_dir=annotations_dir, output_dir='./resized_dataset', target_multiplier=2, domenant_classes=domenant_classes)
 
