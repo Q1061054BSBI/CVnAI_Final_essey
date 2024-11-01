@@ -31,27 +31,6 @@ class VOCDataset(Dataset):
         
         for obj in root.findall('object'):
             label = get_person_label(obj)
-            # label = obj.find('name').text
-            
-            # # Логика для класса "person" с учетом pose и actions
-            # if label == "person":
-            #     pose = obj.find('pose').text if obj.find('pose') is not None else 'Unspecified'
-                
-            #     if pose != "Unspecified":
-            #         label = f"person_{pose.lower()}"
-            #     else:
-            #         # Проверка наличия активных действий, если pose не задан
-            #         actions = obj.find('actions')
-            #         action_found = False
-            #         if actions is not None:
-            #             for action in actions:
-            #                 if int(action.text) == 1:
-            #                     label = f"person_{action.tag.lower()}"
-            #                     action_found = True
-            #                     break
-            #         if not action_found:
-            #             label = "person_unspecified"  # Если действия нет, помечаем как "person_unspecified"
-            
             # Добавляем индекс класса для каждого объекта
             class_idx = self.unique_classes.index(label)
             labels.append(class_idx)
@@ -63,7 +42,15 @@ class VOCDataset(Dataset):
             xmax = int(float(bndbox.find('xmax').text))
             ymax = int(float(bndbox.find('ymax').text))
             boxes.append([xmin, ymin, xmax, ymax])
+
+            # Проверка на валидность bounding box (должен иметь положительную ширину и высоту)
+            if xmax > xmin and ymax > ymin:
+                boxes.append([xmin, ymin, xmax, ymax])
+                labels.append(class_idx)
         
+        if len(boxes) == 0 or len(labels) == 0:
+            return None
+
         # Преобразуем данные в тензоры
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         labels = torch.as_tensor(labels, dtype=torch.int64)
@@ -76,6 +63,7 @@ class VOCDataset(Dataset):
         if self.transforms:
             img = self.transforms(img)
 
+        print(f"Returning image of size: {img.shape} and target with keys: {target.keys()}")
         return img, target
 
     @staticmethod
