@@ -1,17 +1,15 @@
 import os
 import xml.etree.ElementTree as ET
-from PIL import Image, ImageEnhance
-from torchvision import transforms
+from PIL import Image
+import numpy as np
 import random
-import copy
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import glob
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import cv2
-import numpy as np
-from data_processing import get_person_label
+
 
 def identify_minor_classes(class_counts, threshold=500):
     minor_classes = {cls: count for cls, count in class_counts.items() if count < threshold}
@@ -163,23 +161,7 @@ def load_image_with_class_check(image_name, images_dir, annotation_path, target_
     root = tree.getroot()
 
     for obj in root.findall('object'):
-        label = get_person_label(obj)
-        # label = obj.find('name').text
-
-        # # Проверка для подклассов person
-        # if label == "person":
-        #     pose = obj.find('pose').text if obj.find('pose') is not None else 'Unspecified'
-        #     action = None
-        #     if pose == "Unspecified":  # Используем action, если pose не указана
-        #         actions = obj.find('actions')
-        #         if actions is not None:
-        #             for act in actions:
-        #                 if int(act.text) == 1:
-        #                     action = act.tag
-        #                     break
-        #     label = f"person_{pose.lower()}" if pose != "Unspecified" else f"person_{action.lower() if action else 'unspecified'}"
-        
-        # Проверяем, совпадает ли label с целевым классом
+        label = obj.find('name').text
         if label == target_class:
             contains_target_class = True
             bndbox = obj.find('bndbox')
@@ -189,7 +171,6 @@ def load_image_with_class_check(image_name, images_dir, annotation_path, target_
             ymax = int(float(bndbox.find('ymax').text))
             boxes.append([xmin, ymin, xmax, ymax])
 
-        # Проверка на доминирующий класс
         if label in dominant_classes:
             contains_dominant_class = True
             break

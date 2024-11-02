@@ -1,4 +1,5 @@
 /dataset
-/augmented
-/augmented_dataset
-/resized_dataset
+/datasets
+/fast_r_cnn/augmented
+/fast_r_cnn/augmented_dataset
+/fast_r_cnn/resized_dataset
