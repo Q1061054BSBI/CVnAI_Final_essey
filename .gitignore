@@ -4,3 +4,4 @@
 /fast_r_cnn/augmented_dataset
 /fast_r_cnn/resized_dataset
 /run
+/test.py

@@ -29,7 +29,7 @@ def augment_image(image_path, bboxes):
     transform = A.Compose([
         A.HorizontalFlip(p=0.5),
         A.RandomBrightnessContrast(p=0.2),
-        A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, p=0.5)
+        A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=0, p=0.5),
     ], bbox_params=A.BboxParams(format='yolo', label_fields=['labels']))
 
     labels = [0] * len(bboxes)  # Заглушка для labels, так как они уже есть в txt файле

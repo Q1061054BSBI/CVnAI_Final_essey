@@ -51,19 +51,23 @@ class YOLODataset(torch.utils.data.Dataset):
                   'labels': torch.tensor(labels, dtype=torch.int64)}
         return image, target
 
-def evaluate_model_metrics(model, dataloader, class_names):
-    results = model.val(dataloader=dataloader, verbose=False)
+def evaluate_model_metrics(model, class_names):
+    results = model.val(split='test', verbose=True)
 
-    print("\nResults of model estimation:")
-    print(f"Precision: {results['precision']:.4f}")
-    print(f"Recall: {results['recall']:.4f}")
-    print(f"mAP@0.5: {results['map50']:.4f}")
-    print(f"mAP@0.5:0.95: {results['map']:.4f}")
+    # print(f"Overall Precision: {results.metrics.precision:.4f}")
+    # print(f"Overall Recall: {results.metrics.recall:.4f}")
+    # print(f"Overall mAP@0.5: {results.metrics.map50:.4f}")
+    # print(f"Overall mAP@0.5:0.95: {results.metrics.map:.4f}")
 
-    for i, class_name in enumerate(class_names):
-        print(f"{class_name}: Precision: {results['class_metrics'][i]['precision']:.4f}, "
-              f"Recall: {results['class_metrics'][i]['recall']:.4f}, "
-              f"AP@0.5: {results['class_metrics'][i]['ap50']:.4f}")
+    # # Display metrics for each class
+    # print("\nClass-wise Metrics:")
+    # for idx, class_name in enumerate(class_names):
+    #     precision = results.class_metrics['precision'][idx]
+    #     recall = results.class_metrics['recall'][idx]
+    #     map50 = results.class_metrics['map50'][idx]
+    #     map = results.class_metrics['map'][idx]
+
+    #     print(f"{class_name:20} | Precision: {precision:.4f} | Recall: {recall:.4f} | mAP@0.5: {map50:.4f} | mAP@0.5:0.95: {map:.4f}")
         
         
 

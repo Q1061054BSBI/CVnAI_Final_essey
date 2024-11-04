@@ -37,5 +37,5 @@ names:
 nc: 35
 path: resized
 test: test/images
-train: small_train/images
+train: undersampled_train/images
 val: val/images

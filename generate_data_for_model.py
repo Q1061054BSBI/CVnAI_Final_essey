@@ -18,7 +18,6 @@ resize_image_and_annotations(f"{base_dir}/JPEGImages", f"{base_dir}/Annotations"
 print ("Deviding into train test val & small tain (for bug fixing)")
 split_dataset(f"{base_dir}/resized", f"{base_dir}/resized")
 
-# repair_images('./datasets/resized/small_train/images');
 
 print ("Balansing")
 
@@ -27,23 +26,23 @@ class_dict = create_class_dict("./datasets/Annotations")
 train_dir = './datasets/resized/train'
 current_classes = count_classes(f"{train_dir}/labels", class_dict)
 
-plot_class_distribution(class_counts=current_classes, title="Train set distribution")
+# plot_class_distribution(class_counts=current_classes, title="Train set distribution")
 
 
-images_dir = './datasets/resized/train/images'
-labels_dir = './datasets/resized/train/labels'
-output_dir = './datasets/resized/train'
+# images_dir = './datasets/resized/train/images'
+# labels_dir = './datasets/resized/train/labels'
+# output_dir = './datasets/resized/train'
 
 
-lower_threshold = 600 
-upper_threshold = 1500 
+# lower_threshold = 600 
+# upper_threshold = 1500 
 
 
-augment_minor_classes(images_dir, labels_dir, class_dict, lower_threshold, upper_threshold, output_dir)
+# augment_minor_classes(images_dir, labels_dir, class_dict, lower_threshold, upper_threshold, output_dir)
 
-classes_val = count_classes(f"{train_dir}/labels", class_dict=class_dict)
+# classes_val = count_classes(f"{train_dir}/labels", class_dict=class_dict)
 
-plot_class_distribution(classes_val, "Destribution of train set after augumaentation images");
+# plot_class_distribution(classes_val, "Destribution of train set after augumaentation images");
 
 
 
