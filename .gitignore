@@ -5,3 +5,4 @@
 /fast_r_cnn/resized_dataset
 /run
 /test.py
+/yolov5s.pt
