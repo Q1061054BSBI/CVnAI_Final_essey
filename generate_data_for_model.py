@@ -31,23 +31,6 @@ current_classes = count_classes(f"{train_dir}/labels", class_dict)
 plot_class_distribution(class_counts=current_classes, title="Train set distribution")
 
 
-#augmentation
-# images_dir = './datasets/resized/train/images'
-# labels_dir = './datasets/resized/train/labels'
-# output_dir = './datasets/resized/train'
-
-
-# lower_threshold = 600 
-# upper_threshold = 1500 
-
-
-# augment_minor_classes(images_dir, labels_dir, class_dict, lower_threshold, upper_threshold, output_dir)
-
-# classes_val = count_classes(f"{train_dir}/labels", class_dict=class_dict)
-
-# plot_class_distribution(classes_val, "Destribution of train set after augumaentation images");
-
-
 print("undersampling")
 
 def convert_counts_to_id_format(class_to_id, label_counts):
@@ -77,3 +60,20 @@ undersample_dataset(
 current_classes = count_classes(output_labels_dir, class_dict)
 
 plot_class_distribution(class_counts=current_classes, title="Undersampled Train set distribution")
+
+
+#augmentation
+# images_dir = './datasets/resized/undersampled_train/images'
+# labels_dir = './datasets/resized/undersampled_train/labels'
+# output_dir = './datasets/resized/train'
+
+
+# lower_threshold = 600 
+# upper_threshold = 1500 
+
+
+# augment_minor_classes(images_dir, labels_dir, class_dict, lower_threshold, upper_threshold, output_dir)
+
+# classes_val = count_classes(f"{train_dir}/labels", class_dict=class_dict)
+
+# plot_class_distribution(classes_val, "Destribution of train set after augumaentation images");
