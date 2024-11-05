@@ -28,6 +28,7 @@ Ensure you have the following libraries installed:
 Install additional libraries via `pip`:
 ```bash
 pip install torch opencv-python Pillow albumentations ultralytics certifi pyyaml matplotlib
+```
 
 ## Dataset
 The project uses **Pascal VOC 2012**. To use the dataset:
