@@ -5,6 +5,8 @@ from divider import split_dataset
 from processor import create_class_dict
 from ploter import count_classes, plot_class_distribution
 from balancer import augment_minor_classes
+from collections import Counter
+from resizer import undersample_dataset
 
 os.environ['OPENCV_LOG_LEVEL'] = 'SILENT'
 
@@ -26,9 +28,10 @@ class_dict = create_class_dict("./datasets/Annotations")
 train_dir = './datasets/resized/train'
 current_classes = count_classes(f"{train_dir}/labels", class_dict)
 
-# plot_class_distribution(class_counts=current_classes, title="Train set distribution")
+plot_class_distribution(class_counts=current_classes, title="Train set distribution")
 
 
+#augmentation
 # images_dir = './datasets/resized/train/images'
 # labels_dir = './datasets/resized/train/labels'
 # output_dir = './datasets/resized/train'
@@ -45,4 +48,32 @@ current_classes = count_classes(f"{train_dir}/labels", class_dict)
 # plot_class_distribution(classes_val, "Destribution of train set after augumaentation images");
 
 
+print("undersampling")
 
+def convert_counts_to_id_format(class_to_id, label_counts):
+    class_id_counts = Counter({class_to_id[class_name]: label_counts[class_name] 
+                               for class_name in label_counts if class_name in class_to_id})
+    return class_id_counts
+
+
+
+class_id_counts = convert_counts_to_id_format(class_dict, current_classes)
+
+train_images_dir = './datasets/resized/train/images'
+train_labels_dir = './datasets/resized/train/labels'
+output_images_dir = './datasets/resized/undersampled_train/images'
+output_labels_dir = './datasets/resized/undersampled_train/labels'
+
+
+undersample_dataset(
+    images_dir=train_images_dir,
+    labels_dir=train_labels_dir,
+    output_images_dir=output_images_dir,
+    output_labels_dir=output_labels_dir,
+    class_counter=class_id_counts,
+    max_samples_per_class=1000 
+)
+
+current_classes = count_classes(output_labels_dir, class_dict)
+
+plot_class_distribution(class_counts=current_classes, title="Undersampled Train set distribution")

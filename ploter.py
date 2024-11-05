@@ -3,26 +3,10 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import cv2
 import random
-# from processor import create_class_dict 
-# import xml.etree.ElementTree as ET
 import matplotlib.patches as patches
 
 
-os.environ['OPENCV_LOG_LEVEL'] = 'SILENT'
-
-cv2.setLogLevel(3) 
-
 def count_classes(annotations_dir, class_dict):
-    """
-    Считает количество объектов каждого класса на основе аннотаций в формате YOLO.
-
-    Параметры:
-    - annotations_dir (str): Путь к директории с текстовыми файлами аннотаций.
-    - class_dict (dict): Словарь, где ключи - имена классов, значения - их ID.
-
-    Возвращает:
-    - Counter: Словарь с количеством объектов каждого класса.
-    """
     id_to_class = {v: k for k, v in class_dict.items()}
     class_counts = Counter()
 
@@ -44,15 +28,14 @@ def plot_class_distribution(class_counts, title="Class Distribution"):
     classes = list(class_counts.keys())
     counts = list(class_counts.values())
     
-    plt.figure(figsize=(15, 8))  # Увеличиваем размер графика
+    plt.figure(figsize=(15, 8)) 
     bars = plt.bar(classes, counts, color='skyblue')
     plt.xlabel("Classes")
     plt.ylabel("Number of Objects")
     plt.title(title)
-    plt.xticks(rotation=90, ha='right')  # Поворачиваем подписи на 45 градусов и выравниваем вправо
+    plt.xticks(rotation=90, ha='right') 
     plt.tight_layout()
 
-    # Добавление значений на вершину каждого столбца
     for bar, count in zip(bars, counts):
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2, yval, int(count), 
@@ -62,17 +45,9 @@ def plot_class_distribution(class_counts, title="Class Distribution"):
 
 
 def visualize_random_augmented_image(augmented_images_dir, augmented_labels_dir, class_dict):
-    """
-    Отображает случайное аугментированное изображение с bounding boxes из аннотации в формате .txt.
-    
-    Параметры:
-    - augmented_images_dir (str): директория с аугментированными изображениями.
-    - augmented_labels_dir (str): директория с аннотациями в формате .txt.
-    - class_dict (dict): словарь классов, где ключи - имена классов, а значения - их ID.
-    """
     image_files = [f for f in os.listdir(augmented_images_dir) if f.endswith('.jpg')]
     if not image_files:
-        print("Нет изображений для отображения.")
+        print("No images to show")
         return
     
     random_image_path = os.path.join(augmented_images_dir, random.choice(image_files))
@@ -83,13 +58,11 @@ def visualize_random_augmented_image(augmented_images_dir, augmented_labels_dir,
         print(f"No annotation found for image {random_image_path}")
         return
 
-    # Загрузка изображения
     image = cv2.imread(random_image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     fig, ax = plt.subplots(1, figsize=(12, 12))
     ax.imshow(image)
 
-    # Загрузка аннотации
     with open(label_path, 'r') as file:
         for line in file:
             parts = line.strip().split()
@@ -97,7 +70,6 @@ def visualize_random_augmented_image(augmented_images_dir, augmented_labels_dir,
             class_name = [k for k, v in class_dict.items() if v == class_id][0]
             x_center, y_center, width, height = map(float, parts[1:])
 
-            # Преобразование координат из YOLO формата в координаты для отображения
             img_h, img_w = image.shape[:2]
             xmin = int((x_center - width / 2) * img_w)
             ymin = int((y_center - height / 2) * img_h)
@@ -111,9 +83,3 @@ def visualize_random_augmented_image(augmented_images_dir, augmented_labels_dir,
     plt.axis('off')
     plt.show()
 
-# class_dictionary = create_class_dict("./datasets/Annotations")
-
-# train_dir = './datasets/resized/train'
-# current_classes = count_classes(f"{train_dir}/labels", class_dictionary)
-
-# plot_class_distribution(class_counts=current_classes, title="Train set distribution")

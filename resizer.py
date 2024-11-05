@@ -18,21 +18,24 @@ def resize_image_and_annotations(input_images_dir, input_annotations_dir, output
             image_path = os.path.join(input_images_dir, image_name)
             annotation_path = os.path.join(input_annotations_dir, image_name.replace('.jpg', '.xml'))
 
+            #excluding not labled images
             if not os.path.exists(annotation_path):
-                print(f"Аннотация для {image_name} не найдена, пропуск...")
+                print(f"Abbotations for {image_name} were not found, passing...")
                 continue
 
-            # Открываем изображение и изменяем его размер с помощью OpenCV
+            #excluding images with errors
             img = cv2.imread(image_path)
             if img is None:
-                print(f"Ошибка при загрузке изображения {image_name}")
+                print(f"Image Loading error {image_name}")
                 continue
+
+
             original_height, original_width = img.shape[:2]
             img_resized = cv2.resize(img, (target_width, target_height), interpolation=cv2.INTER_AREA)
             output_image_path = os.path.join(output_images_dir, image_name)
             cv2.imwrite(output_image_path, img_resized, [cv2.IMWRITE_JPEG_QUALITY, 95])
 
-            # Обновляем аннотации
+            #Anniataions update
             tree = ET.parse(annotation_path)
             root = tree.getroot()
             scale_x = target_width / original_width
@@ -44,7 +47,6 @@ def resize_image_and_annotations(input_images_dir, input_annotations_dir, output
                 xmax = int(float(bndbox.find('xmax').text))
                 ymax = int(float(bndbox.find('ymax').text))
 
-                # Пересчет координат с учетом нового размера изображения
                 new_xmin = int(xmin * scale_x)
                 new_ymin = int(ymin * scale_y)
                 new_xmax = int(xmax * scale_x)
@@ -58,28 +60,16 @@ def resize_image_and_annotations(input_images_dir, input_annotations_dir, output
             output_annotation_path = os.path.join(output_annotations_dir, image_name.replace('.jpg', '.xml'))
             tree.write(output_annotation_path)
 
-    print("Ресайз изображений и обновление аннотаций завершены.")
+    print("Images resize and annotations update is completed")
 
 
 def undersample_dataset(images_dir, labels_dir, output_images_dir, output_labels_dir, class_counter, max_samples_per_class=1000):
-    """
-    Делает undersampling тренировочного набора данных, выбирая изображения с учетом количества объектов каждого класса.
-    
-    Параметры:
-    - images_dir (str): Путь к папке с изображениями.
-    - labels_dir (str): Путь к папке с аннотациями.
-    - output_images_dir (str): Путь для сохранения изображений после undersampling.
-    - output_labels_dir (str): Путь для сохранения аннотаций после undersampling.
-    - class_counter (Counter): Счетчик с количеством объектов для каждого класса.
-    - max_samples_per_class (int): Порог количества объектов для каждого класса.
-    """
+   
     os.makedirs(output_images_dir, exist_ok=True)
     os.makedirs(output_labels_dir, exist_ok=True)
 
-    # Сортируем классы по количеству объектов от меньшего к большему
     sorted_classes = sorted(class_counter.items(), key=lambda x: x[1])
 
-    # Счетчики для фиксирования количества объектов каждого класса
     selected_counts = Counter()
 
     image_files = [f for f in os.listdir(images_dir) if f.endswith('.jpg')]
@@ -87,7 +77,7 @@ def undersample_dataset(images_dir, labels_dir, output_images_dir, output_labels
 
     for class_id, _ in sorted_classes:
         if selected_counts[class_id] >= max_samples_per_class:
-            continue  # Переходим к следующему классу, если порог достигнут
+            continue 
 
         for image_file in image_files:
             label_file = image_file.replace('.jpg', '.txt')
@@ -97,24 +87,25 @@ def undersample_dataset(images_dir, labels_dir, output_images_dir, output_labels
             if not os.path.exists(label_path):
                 continue
 
-            # Проверяем, содержится ли нужный класс на изображении
             with open(label_path, 'r') as f:
                 objects_in_image = [int(line.split()[0]) for line in f]
             
             if class_id in objects_in_image:
-                # Проверяем, достигнут ли лимиты для всех классов на изображении
                 if all(selected_counts[obj] < max_samples_per_class for obj in objects_in_image):
-                    # Копируем изображение и аннотацию в выходные папки
                     shutil.copy(image_path, os.path.join(output_images_dir, image_file))
                     shutil.copy(label_path, os.path.join(output_labels_dir, label_file))
 
-                    # Увеличиваем счетчики для всех объектов на изображении
                     for obj in objects_in_image:
                         selected_counts[obj] += 1
 
-                    # Останавливаем поиск для текущего класса, если порог достигнут
                     if selected_counts[class_id] >= max_samples_per_class:
                         break
 
-    print(f"Undersampling завершен. Количество объектов для каждого класса:")
-    print(selected_counts)
+    print(f"Undersampling is complete.")
+
+
+def convert_counts_to_id_format(class_to_id, label_counts):
+    class_id_counts = Counter({class_to_id[class_name]: label_counts[class_name] for class_name in label_counts if class_name in class_to_id})
+    return class_id_counts
+
+

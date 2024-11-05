@@ -6,21 +6,13 @@ os.environ['OPENCV_LOG_LEVEL'] = 'SILENT'
 
 cv2.setLogLevel(3) 
 
-def convert_voc_to_yolo(annotation_path, output_path, image_path, dictionary):
-    """
-    Конвертирует аннотацию Pascal VOC в формат YOLO для одного изображения.
-
-    Параметры:
-    - annotation_path (str): Путь к XML файлу аннотации.
-    - output_path (str): Путь для сохранения .txt файла аннотации.
-    - image_path (str): Путь к изображению для определения размеров.
-    - dictionary (dict): Словарь классов для преобразования имени класса в ID.
-    """
+def convert_voc_to_yolo(annotation_path, output_path, image_path, dict):
+    #anti errores checks
     if not annotation_path.endswith('.xml'):
-        raise ValueError("Файл аннотации должен быть в формате XML.")
+        raise ValueError("The original file should be in XML format")
 
     if not os.path.exists(annotation_path) or not os.path.exists(image_path):
-        print(f"Файл аннотации {annotation_path} или изображение {image_path} не найдено.")
+        print(f"Annotation {annotation_path} or image {image_path} was not found")
         return
 
     tree = ET.parse(annotation_path)
@@ -32,9 +24,9 @@ def convert_voc_to_yolo(annotation_path, output_path, image_path, dictionary):
     with open(output_path, 'w') as label_file:
         for obj in root.findall('object'):
             class_name = get_person_label(obj)
-            class_id = dictionary.get(class_name, -1)  # Получаем ID класса из словаря
+            class_id = dict.get(class_name, -1) 
             if class_id == -1:
-                print(f"Класс {class_name} не найден в словаре. Пропуск.")
+                print(f"The class {class_name} was not found in dictionary. Passing...") #dict contains of all classes titles and there ids
                 continue
 
             bndbox = obj.find('bndbox')
@@ -43,7 +35,6 @@ def convert_voc_to_yolo(annotation_path, output_path, image_path, dictionary):
             xmax = float(bndbox.find('xmax').text)
             ymax = float(bndbox.find('ymax').text)
 
-            # Преобразование координат в YOLO формат
             x_center = ((xmin + xmax) / 2) / image_width
             y_center = ((ymin + ymax) / 2) / image_height
             box_width = (xmax - xmin) / image_width
@@ -51,14 +42,12 @@ def convert_voc_to_yolo(annotation_path, output_path, image_path, dictionary):
 
             label_file.write(f"{class_id} {x_center:.6f} {y_center:.6f} {box_width:.6f} {box_height:.6f}\n")
 
-    # print(f"Конвертация аннотации для {annotation_path} завершена.")
 
 
 
 def create_class_dict(annotations_dir):
     unique_classes = set()
 
-    # Обходим все файлы аннотаций и извлекаем имена классов
     for annotation_file in os.listdir(annotations_dir):
         if annotation_file.endswith('.xml'):
             annotation_path = os.path.join(annotations_dir, annotation_file)
@@ -69,26 +58,25 @@ def create_class_dict(annotations_dir):
                 class_name = get_person_label(obj)
                 unique_classes.add(class_name)
 
-    # Создаем словарь с ID для каждого класса
     class_to_id = {cls: idx for idx, cls in enumerate(sorted(unique_classes))}
     return class_to_id
 
+
 def class_name_to_id(class_name, disctionary):
-        return disctionary.get(class_name, -1)  # Возвращает -1, если класс не найден
+        return disctionary.get(class_name, -1) 
+
 
 def get_person_label(obj):
     #dividing person into several clases
     label = obj.find('name').text
 
-    # Проверяем, что это действительно "person"
     if label != "person":
-        return label  # Возвращаем исходную метку для других классов
+        return label  
 
-    # Проверяем наличие action
     actions = obj.find('actions')
     action_found = False
     if actions is not None:
-        all_zero = True  # Флаг, указывающий, что все действия равны нулю
+        all_zero = True
         for action in actions:
             if int(action.text) == 1:
                 label = f"person_{action.tag.lower()}"
@@ -97,11 +85,9 @@ def get_person_label(obj):
             if int(action.text) != 0:
                 all_zero = False
         
-        # Если все действия равны нулю, отмечаем как unspecified
         if not action_found and all_zero:
             label = "person_unspecified"
     
-    # Если action не найден или он unspecified, проверяем pose
     if not action_found or label == "person_unspecified":
         pose = obj.find('pose').text if obj.find('pose') is not None else 'Unspecified'
         if pose != "Unspecified":
